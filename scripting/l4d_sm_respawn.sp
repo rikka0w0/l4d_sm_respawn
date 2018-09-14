@@ -5,7 +5,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "1.9.9"
+#define PLUGIN_VERSION "2.0.0"
 
 
 public Plugin myinfo = {
@@ -213,6 +213,11 @@ public void ItemHandler(Handle topmenu, TopMenuAction action, TopMenuObject obje
 		Format(buffer, maxlength, "%T", "Respawn Player", clientID);
 	} else if (action == TopMenuAction_SelectOption) {
 		// The admin menu item was selected, display the dead player list
+		CreateAndDisplayMenu(clientID);
+	}
+}
+
+bool CreateAndDisplayMenu(int clientID) {
 		Menu playerList = CreateMenu(PlayerListHandler, MenuAction_Select | MenuAction_Cancel);
 		playerList.SetTitle("%T", "Respawn Player", clientID);
 		
@@ -220,7 +225,7 @@ public void ItemHandler(Handle topmenu, TopMenuAction action, TopMenuObject obje
 		if (numberOfDead == 0) {
 			PrintToChat(clientID, "%t", "Nobody is dead");
 			delete playerList;
-			return;
+			return false;
 		}
 		
 		//Add an exit button
@@ -229,7 +234,7 @@ public void ItemHandler(Handle topmenu, TopMenuAction action, TopMenuObject obje
 		
 		//And finally, show the menu to the client
 		playerList.Display(clientID, MENU_TIME_FOREVER);
-	}
+		return true;
 }
 
 public int PlayerListHandler(Menu menu, MenuAction action, int param1, int param2) {
@@ -250,6 +255,8 @@ public int PlayerListHandler(Menu menu, MenuAction action, int param1, int param
 		menu.GetItem(param2, menuInfo, sizeof(menuInfo), _, menuName, sizeof(menuName));
 		int targetClientID = GetClientOfUserId(StringToInt(menuInfo));
 		RespawnPlayer(param1, targetClientID);
+		
+		CreateAndDisplayMenu(param1);
 	}
 	
 	return 0;
